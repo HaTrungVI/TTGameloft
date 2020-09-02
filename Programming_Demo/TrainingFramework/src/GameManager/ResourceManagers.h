@@ -10,6 +10,7 @@
 #include "GameObject/Sprite2D.h"
 #include "GameObject/Sprite3D.h"
 #include "GameObject/Text.h"
+#include "GameObject/Bird.h"
 
 class ResourceManagers : public CSingleton<ResourceManagers>
 {

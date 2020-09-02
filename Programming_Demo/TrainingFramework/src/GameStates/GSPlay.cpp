@@ -26,7 +26,7 @@ GSPlay::~GSPlay()
 void GSPlay::Init()
 {
 	_score = 0;
-	_pipeCount = 5;
+	_pipeCount = 4;
 	_pipeSpace = 200;
 	_pipeW = 150;
 	_pipeSpeed = 50;
@@ -48,7 +48,19 @@ void GSPlay::Init()
 	m_score = std::make_shared< Text>(shader, font, "score: " + _score, TEXT_COLOR::RED, 1.0);
 	m_score->Set2DPosition(Vector2(5, 25));
 
+	//pipe
 	DrawPipe();
+
+	//bird
+	shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
+	texture = ResourceManagers::GetInstance()->GetTexture("yellowbird-midflap");
+	auto up_texture = ResourceManagers::GetInstance()->GetTexture("yellowbird-upflap");
+	auto down_texture = ResourceManagers::GetInstance()->GetTexture("yellowbird-downflap");
+	m_Bird = std::make_shared<Bird>(model, shader, texture);
+	m_Bird->Set2DPosition(screenWidth / 2, screenHeight / 2);
+	m_Bird->SetSize(50, 50);
+	m_Bird->SetTextureState(down_texture, up_texture, texture);
+	m_Bird->AddForce(1400);
 }
 
 void GSPlay::Exit()
@@ -64,7 +76,7 @@ void GSPlay::Pause()
 
 void GSPlay::Resume()
 {
-
+	
 }
 
 
@@ -80,10 +92,14 @@ void GSPlay::HandleKeyEvents(int key, bool bIsPressed)
 
 void GSPlay::HandleTouchEvents(int x, int y, bool bIsPressed)
 {
+	if (bIsPressed) {
+		m_Bird->AddForce(1400);
+	}
 }
 
 void GSPlay::Update(float deltaTime)
 {
+	m_Bird->Update(deltaTime);
 	UpdatePipePosition(deltaTime);
 }
 
@@ -93,6 +109,7 @@ void GSPlay::Draw()
 	for (auto pipe : m_pipes) {
 		pipe->Draw();
 	}
+	m_Bird->Draw();
 	m_score->Draw();
 }
 
@@ -102,7 +119,7 @@ void GSPlay::SetNewPostionForBullet()
 
 void GSPlay::DrawPipe() 
 {
-	float startPos = 0;
+	float startPos = screenWidth;
 	int rand_y = 100;
 	int w = screenWidth / 8;
 	int h = screenHeight / 1.3;
@@ -118,6 +135,7 @@ void GSPlay::DrawPipe()
 		pipe->Set2DPosition(startPos, rand_y);
 		pipe->SetSize(screenWidth / 8, screenHeight / 1.3);
 
+		texture = ResourceManagers::GetInstance()->GetTexture("pipe-green_2");
 		auto pipe2 = std::make_shared<Sprite2D>(model, shader, texture);
 		pipe2->Set2DPosition(startPos, rand_y + _pipeW + h);
 		pipe2->SetSize(w, h);

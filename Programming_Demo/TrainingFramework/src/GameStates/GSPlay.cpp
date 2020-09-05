@@ -25,11 +25,12 @@ GSPlay::~GSPlay()
 
 void GSPlay::Init()
 {
+	_endGame = false;
 	_score = 0;
 	_pipeCount = 4;
 	_pipeSpace = 200;
-	_pipeW = 150;
-	_pipeSpeed = 50;
+	_pipeW = 200;
+	_pipeSpeed = 60;
 	_pipeLevel = 100;
 
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D");
@@ -45,7 +46,7 @@ void GSPlay::Init()
 	//text game title
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
 	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("arialbd");
-	m_score = std::make_shared< Text>(shader, font, "score: " + _score, TEXT_COLOR::RED, 1.0);
+	m_score = std::make_shared< Text>(shader, font, "SCORE: " + std::to_string(_score), TEXT_COLOR::RED, 1.0);
 	m_score->Set2DPosition(Vector2(5, 25));
 
 	//pipe
@@ -61,6 +62,13 @@ void GSPlay::Init()
 	m_Bird->SetSize(50, 50);
 	m_Bird->SetTextureState(down_texture, up_texture, texture);
 	m_Bird->AddForce(1400);
+
+	//
+	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+		return;
+	wingSound = Mix_LoadWAV("wing.wav");
+	hitSound = Mix_LoadWAV("hit.wav");
+	pointSound = Mix_LoadWAV("point.wav");
 }
 
 void GSPlay::Exit()
@@ -92,7 +100,8 @@ void GSPlay::HandleKeyEvents(int key, bool bIsPressed)
 
 void GSPlay::HandleTouchEvents(int x, int y, bool bIsPressed)
 {
-	if (bIsPressed) {
+	if (bIsPressed && !_endGame) {
+		Mix_PlayChannel(-1, wingSound, 0);
 		m_Bird->AddForce(1400);
 	}
 }
@@ -100,7 +109,9 @@ void GSPlay::HandleTouchEvents(int x, int y, bool bIsPressed)
 void GSPlay::Update(float deltaTime)
 {
 	m_Bird->Update(deltaTime);
-	UpdatePipePosition(deltaTime);
+	if(!_endGame)
+		UpdatePipePosition(deltaTime);
+	m_score->setText("SCORE: " + std::to_string(_score));
 }
 
 void GSPlay::Draw()
@@ -116,7 +127,9 @@ void GSPlay::Draw()
 void GSPlay::SetNewPostionForBullet()
 {
 }
-
+void GSPlay::CheckScore() {
+	
+}
 void GSPlay::DrawPipe() 
 {
 	float startPos = screenWidth;
@@ -144,6 +157,8 @@ void GSPlay::DrawPipe()
 		m_pipes.push_back(pipe2);
 		startPos += _pipeSpace;
 	}
+
+	m_tempPipe = m_pipes.front();
 }
 
 void GSPlay::UpdatePipePosition(float deltaTime)
@@ -154,8 +169,14 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 
 	float lastX = m_pipes.back()->Get2DPosition().x;
 	int count = 0;
+	float minD = 10000;
 
 	for (auto pipe : m_pipes) {
+		if (CheckCollision(pipe->Get2DPosition())) {
+			Mix_PlayChannel(1, hitSound, 0);
+			_endGame = true;
+			m_Bird->SetDie();
+		}
 		// update x
 		if (pipe->Get2DPosition().x < -w) {
 			float x = lastX + _pipeSpace;
@@ -179,6 +200,42 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 		if (count % 2 != 0) {
 			lastX = pipe->Get2DPosition().x;
 		}
+		else {
+			float distance = pipe->Get2DPosition().x - m_Bird->Get2DPosition().x;
+			if (distance >= 0 && distance < minD) {
+				minD = distance;
+				m_temp = pipe;
+			}
+		}
 		count += 1;
 	}
+
+	if (m_tempPipe->Get2DPosition().x <= m_Bird->Get2DPosition().x) {
+		Mix_PlayChannel(0, pointSound, 0);
+		_score += 1;
+	}
+
+	m_tempPipe = m_temp;
+}
+
+bool GSPlay::CheckCollision(Vector2 pipePosition) {
+	int w = screenWidth / 8;
+	int h = screenHeight / 1.3;
+
+	float min_w = pipePosition.x - w / 2;
+	float max_w = pipePosition.x + w / 2;
+	float min_h = pipePosition.y - h / 2;
+	float max_h = pipePosition.y + h / 2;
+
+	std::shared_ptr<Vector2> b_upRight = std::make_shared<Vector2>(m_Bird->Get2DPosition().x + 25, m_Bird->Get2DPosition().y - 25);
+	std::shared_ptr<Vector2> b_upLeft = std::make_shared<Vector2>(m_Bird->Get2DPosition().x - 25, m_Bird->Get2DPosition().y - 25);
+	std::shared_ptr<Vector2> b_downRight = std::make_shared<Vector2>(m_Bird->Get2DPosition().x + 25, m_Bird->Get2DPosition().y + 25);
+	std::shared_ptr<Vector2> b_downLeft = std::make_shared<Vector2>(m_Bird->Get2DPosition().x - 25, m_Bird->Get2DPosition().y + 25);
+
+	if (b_upRight->x >= min_w && b_upRight->x <= max_w && b_upRight->y >= min_h && b_upRight->y <= max_h) return true;
+	if (b_upLeft->x >= min_w && b_upLeft->x <= max_w && b_upLeft->y >= min_h && b_upLeft->y <= max_h) return true;
+	if (b_downRight->x >= min_w && b_downRight->x <= max_w && b_downRight->y >= min_h && b_downRight->y <= max_h) return true;
+	if (b_downLeft->x >= min_w && b_downLeft->x <= max_w && b_downLeft->y >= min_h && b_downLeft->y <= max_h) return true;
+
+	return false;
 }

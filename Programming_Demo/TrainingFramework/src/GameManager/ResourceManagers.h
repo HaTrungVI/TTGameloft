@@ -11,6 +11,7 @@
 #include "GameObject/Sprite3D.h"
 #include "GameObject/Text.h"
 #include "GameObject/Bird.h"
+#include <SDL_mixer.h>
 
 class ResourceManagers : public CSingleton<ResourceManagers>
 {
@@ -41,5 +42,4 @@ private:
 	std::string m_TexturePath;
 	std::string m_ModelsPath;
 	std::string m_FontPath;
-
 };

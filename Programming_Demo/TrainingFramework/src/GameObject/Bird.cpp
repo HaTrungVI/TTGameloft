@@ -19,7 +19,9 @@ void Bird::Update(float deltaTime) {
 
 	ApplyAnimation(total_force);
 }
-
+void Bird::SetDie() {
+	m_Force = 0;
+}
 void Bird::ApplyAnimation(float param)
 {
 	if (param > 50) SetTexture(up_Texture);

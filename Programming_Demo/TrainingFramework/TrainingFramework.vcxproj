@@ -99,6 +99,8 @@
     <OutDir>$(SolutionDir)\BIN-Nvidia\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)SoundLIB\SDL\include;$(SolutionDir)SoundLIB\SDL_mixer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)SoundLIB\SDL\lib\x86;$(SolutionDir)SoundLIB\SDL_mixer\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-ATI|Win32'">
     <OutDir>$(SolutionDir)\BIN-ATI\</OutDir>
@@ -145,7 +147,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include\AMD;$(SolutionDir)\freetype\include;$(SolutionDir)\Utilities\src;$(projectdir)\src\GameManager;$(projectdir)\src\GameObject;$(projectdir)\src\GameState;$(projectdir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)SoundLIB\SDL_mixer\include;$(SolutionDir)\Include\AMD;$(SolutionDir)\freetype\include;$(SolutionDir)\Utilities\src;$(projectdir)\src\GameManager;$(projectdir)\src\GameObject;$(projectdir)\src\GameState;$(projectdir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -155,7 +157,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libEGL.lib;libGLESv2.lib;WinMM.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libEGL.lib;libGLESv2.lib;WinMM.Lib;SDL.lib;SDLmain.lib;SDL_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\Nvidia;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>

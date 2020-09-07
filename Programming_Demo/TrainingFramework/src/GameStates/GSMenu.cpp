@@ -5,7 +5,7 @@ extern int screenHeight; //need get on Graphic engine
 
 GSMenu::GSMenu()
 {
-
+	m_time = 0;
 }
 
 
@@ -26,21 +26,26 @@ void GSMenu::Init()
 	m_BackGround->Set2DPosition(screenWidth / 2, screenHeight / 2);
 	m_BackGround->SetSize(screenWidth, screenHeight);
 
+	texture = ResourceManagers::GetInstance()->GetTexture("flappy-bird-logo_0");
+	m_Logo = std::make_shared<Sprite2D>(model, shader, texture);
+	m_Logo->Set2DPosition(screenWidth / 2, 150);
+	m_Logo->SetSize(300, 75);
+
 	//play button
-	texture = ResourceManagers::GetInstance()->GetTexture("button_play");
+	texture = ResourceManagers::GetInstance()->GetTexture("loadBtn");
 	std::shared_ptr<GameButton> button = std::make_shared<GameButton>(model, shader, texture);
-	button->Set2DPosition(screenWidth / 2, 200);
-	button->SetSize(200, 50);
+	button->Set2DPosition(screenWidth / 2, 350);
+	button->SetSize(300, 70);
 	button->SetOnClick([]() {
 		GameStateMachine::GetInstance()->ChangeState(StateTypes::STATE_Play);
 		});
 	m_listButton.push_back(button);
 
 	//exit button
-	texture = ResourceManagers::GetInstance()->GetTexture("button_quit");
+	texture = ResourceManagers::GetInstance()->GetTexture("exitBtn");
 	button = std::make_shared<GameButton>(model, shader, texture);
-	button->Set2DPosition(screenWidth / 2, 300);
-	button->SetSize(200, 50);
+	button->Set2DPosition(screenWidth / 2, 450);
+	button->SetSize(300, 80);
 	button->SetOnClick([]() {
 		exit(0);
 		});
@@ -48,10 +53,12 @@ void GSMenu::Init()
 
 
 	//text game title
+	int max_score = ResourceManagers::GetInstance()->GetScore();
+	std::string txt = max_score == -1 ? "FIRST TIME TO PLAY" : ("BEST SCORE: " + std::to_string(max_score));
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
-	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("arialbd");
-	m_Text_gameName = std::make_shared< Text>(shader, font, "DEMO FLAPPY BIRD", TEXT_COLOR::GREEN, 1.0);
-	m_Text_gameName->Set2DPosition(Vector2(screenWidth / 2 - 120, 120));
+	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("slkscr");
+	m_Text_gameName = std::make_shared< Text>(shader, font, txt, TEXT_COLOR::WHILE, 1.2);
+	m_Text_gameName->Set2DPosition(Vector2(screenWidth / 2 - txt.length()*8, 250));
 }
 
 void GSMenu::Exit()
@@ -82,6 +89,7 @@ void GSMenu::HandleKeyEvents(int key, bool bIsPressed)
 
 void GSMenu::HandleTouchEvents(int x, int y, bool bIsPressed)
 {
+	if (m_time < 0.2f) return;
 	for (auto it : m_listButton)
 	{
 		(it)->HandleTouchEvents(x, y, bIsPressed);
@@ -91,6 +99,7 @@ void GSMenu::HandleTouchEvents(int x, int y, bool bIsPressed)
 
 void GSMenu::Update(float deltaTime)
 {
+	m_time += deltaTime;
 	m_BackGround->Update(deltaTime);
 	for (auto it : m_listButton)
 	{
@@ -106,4 +115,5 @@ void GSMenu::Draw()
 		it->Draw();
 	}
 	m_Text_gameName->Draw();
+	m_Logo->Draw();
 }

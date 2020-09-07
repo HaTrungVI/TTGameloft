@@ -62,7 +62,7 @@ void ResourceManagers::AddTexture(const std::string& name)
 	}
 	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 	std::string file = m_TexturePath + name + ".tga";
-	texture->Init(file.c_str(), GL_CLAMP_TO_EDGE, GL_LINEAR_MIPMAP_LINEAR);
+	texture->Init(file.c_str(), GL_CLAMP_TO_EDGE, GL_LINEAR);
 	m_MapTexture.insert(std::pair<std::string, std::shared_ptr<Texture>>(name, texture));
 }
 
@@ -127,7 +127,7 @@ std::shared_ptr<Texture> ResourceManagers::GetTexture(const std::string& name)
 	}
 	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 	std::string file = m_TexturePath + name + ".tga";
-	texture->Init(file.c_str(), GL_CLAMP_TO_EDGE, GL_LINEAR_MIPMAP_LINEAR);
+	texture->Init(file.c_str(), GL_CLAMP_TO_EDGE, GL_LINEAR);
 	m_MapTexture.insert(std::pair<std::string, std::shared_ptr<Texture>>(name, texture));
 	return texture;
 }
@@ -157,4 +157,18 @@ std::shared_ptr<Font> ResourceManagers::GetFont(const std::string& name)
 	std::shared_ptr<Font> font = std::make_shared<Font>(path);
 	m_MapFont.insert(std::pair<std::string, std::shared_ptr<Font>>(name, font));
 	return font;
+}
+int ResourceManagers::GetScore() {
+	std::ifstream infile;
+	infile.open("Data.dat");
+	int data = -1;
+	infile >> data;
+	infile.close();
+	return data;
+}
+void ResourceManagers::SetScore(int _score) {
+	std::ofstream outfile;
+	outfile.open("Data.dat");
+	outfile << _score << std::endl;
+	outfile.close();
 }

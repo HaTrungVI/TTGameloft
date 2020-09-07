@@ -45,12 +45,22 @@ void GSPlay::Init()
 
 	//text game title
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
-	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("arialbd");
-	m_score = std::make_shared< Text>(shader, font, "SCORE: " + std::to_string(_score), TEXT_COLOR::RED, 1.0);
+	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("slkscr");
+	m_score = std::make_shared< Text>(shader, font, "SCORE: " + std::to_string(_score), TEXT_COLOR::WHILE, 1.0);
 	m_score->Set2DPosition(Vector2(5, 25));
 
 	//pipe
 	DrawPipe();
+
+	// btn
+	shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
+	texture = ResourceManagers::GetInstance()->GetTexture("gameover");
+	m_gameOverBtn = std::make_shared<GameButton>(model, shader, texture);
+	m_gameOverBtn->Set2DPosition(screenWidth / 2, -screenHeight);
+	m_gameOverBtn->SetSize(200, 50);
+	m_gameOverBtn->SetOnClick([]() {
+		GameStateMachine::GetInstance()->ChangeState(StateTypes::STATE_Menu);
+		});
 
 	//bird
 	shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -104,6 +114,7 @@ void GSPlay::HandleTouchEvents(int x, int y, bool bIsPressed)
 		Mix_PlayChannel(-1, wingSound, 0);
 		m_Bird->AddForce(1400);
 	}
+	m_gameOverBtn->HandleTouchEvents(x, y, bIsPressed);
 }
 
 void GSPlay::Update(float deltaTime)
@@ -111,6 +122,12 @@ void GSPlay::Update(float deltaTime)
 	m_Bird->Update(deltaTime);
 	if(!_endGame)
 		UpdatePipePosition(deltaTime);
+	else {
+		float y = m_gameOverBtn->Get2DPosition().y;
+		y += 1500 * deltaTime;
+		y = y >= screenHeight / 2 ? screenHeight / 2 : y;
+		m_gameOverBtn->Set2DPosition(m_gameOverBtn->Get2DPosition().x, y);
+	}
 	m_score->setText("SCORE: " + std::to_string(_score));
 }
 
@@ -122,6 +139,7 @@ void GSPlay::Draw()
 	}
 	m_Bird->Draw();
 	m_score->Draw();
+	m_gameOverBtn->Draw();
 }
 
 void GSPlay::SetNewPostionForBullet()
@@ -173,9 +191,7 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 
 	for (auto pipe : m_pipes) {
 		if (CheckCollision(pipe->Get2DPosition())) {
-			Mix_PlayChannel(1, hitSound, 0);
-			_endGame = true;
-			m_Bird->SetDie();
+			EndGame();
 		}
 		// update x
 		if (pipe->Get2DPosition().x < -w) {
@@ -217,7 +233,15 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 
 	m_tempPipe = m_temp;
 }
+void GSPlay::EndGame() {
+	Mix_PlayChannel(1, hitSound, 0);
+	m_Bird->SetDie();
+	int max_score = ResourceManagers::GetInstance()->GetScore();
+	if (_score > max_score)
+		ResourceManagers::GetInstance()->SetScore(_score);
 
+	_endGame = true;
+}
 bool GSPlay::CheckCollision(Vector2 pipePosition) {
 	int w = screenWidth / 8;
 	int h = screenHeight / 1.3;
@@ -236,6 +260,8 @@ bool GSPlay::CheckCollision(Vector2 pipePosition) {
 	if (b_upLeft->x >= min_w && b_upLeft->x <= max_w && b_upLeft->y >= min_h && b_upLeft->y <= max_h) return true;
 	if (b_downRight->x >= min_w && b_downRight->x <= max_w && b_downRight->y >= min_h && b_downRight->y <= max_h) return true;
 	if (b_downLeft->x >= min_w && b_downLeft->x <= max_w && b_downLeft->y >= min_h && b_downLeft->y <= max_h) return true;
+	if (m_Bird->Get2DPosition().y >= screenHeight - 10) return true;
+	if (m_Bird->Get2DPosition().y <= 10) return true;
 
 	return false;
 }

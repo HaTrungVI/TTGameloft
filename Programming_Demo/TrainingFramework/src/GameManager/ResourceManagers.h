@@ -12,6 +12,9 @@
 #include "GameObject/Text.h"
 #include "GameObject/Bird.h"
 #include <SDL_mixer.h>
+#include <iostream>
+#include <fstream>
+
 
 class ResourceManagers : public CSingleton<ResourceManagers>
 {
@@ -27,6 +30,8 @@ public:
 	void RemoveModel(const std::string& name);
 	void RemoveTexture(const std::string& name);
 	void RemoveFont(const std::string& name);
+	int GetScore();
+	void SetScore(int _score);
 	
 	std::shared_ptr<Shaders> GetShader(const std::string& name);
 	std::shared_ptr<Texture> GetTexture(const std::string& name);

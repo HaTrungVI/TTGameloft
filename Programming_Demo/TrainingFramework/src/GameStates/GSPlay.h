@@ -1,5 +1,6 @@
 #pragma once
 #include "gamestatebase.h"
+#include "GameButton.h"
 #include <list>
 #include <cstdlib>
 
@@ -34,12 +35,15 @@ private:
 	void UpdatePipePosition(float deltaTime);
 	void CheckScore();
 	bool CheckCollision(Vector2 pipePosition);
+	void EndGame();
 	std::shared_ptr<Bird> m_Bird;
 	std::shared_ptr<Sprite2D> m_BackGround;
 	std::shared_ptr<Text>  m_score;
 	std::list<std::shared_ptr<Sprite2D>> m_pipes;
 	std::shared_ptr<Sprite2D> m_temp;
 	std::shared_ptr<Sprite2D> m_tempPipe;
+	std::shared_ptr<GameButton> m_gameOverBtn;
+
 	int _score;
 	int _pipeCount;
 	float _pipeSpace;

@@ -23,8 +23,9 @@ public:
 
 private:
 	std::shared_ptr<Sprite2D> m_BackGround;
+	std::shared_ptr<Sprite2D> m_Logo;
 	std::list<std::shared_ptr<GameButton>>	m_listButton;
 	std::shared_ptr<Text>  m_Text_gameName;
-
+	float m_time = 0;
 };
 

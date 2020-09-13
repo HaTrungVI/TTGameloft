@@ -8,6 +8,7 @@
 #include "Sprite2D.h"
 #include "Sprite3D.h"
 #include "Text.h"
+#include <math.h>
 
 extern int screenWidth; //need get on Graphic engine
 extern int screenHeight; //need get on Graphic engine
@@ -32,6 +33,8 @@ void GSPlay::Init()
 	_pipeW = 200;
 	_pipeSpeed = 60;
 	_pipeLevel = 100;
+	_randPosition_Y = (rand() % 10 > 5);
+	_canMoveY = false;
 
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D");
 	auto texture = ResourceManagers::GetInstance()->GetTexture("background-day");
@@ -120,15 +123,21 @@ void GSPlay::HandleTouchEvents(int x, int y, bool bIsPressed)
 void GSPlay::Update(float deltaTime)
 {
 	m_Bird->Update(deltaTime);
-	if(!_endGame)
+	if (!_endGame) {
+		//if (_score % 2 == 0) {
+			//_randPosition_Y = (rand() % 10 > 5);
+		//}
 		UpdatePipePosition(deltaTime);
+		_pipeSpeed += deltaTime;
+	}
 	else {
 		float y = m_gameOverBtn->Get2DPosition().y;
 		y += 1500 * deltaTime;
 		y = y >= screenHeight / 2 ? screenHeight / 2 : y;
 		m_gameOverBtn->Set2DPosition(m_gameOverBtn->Get2DPosition().x, y);
 	}
-	m_score->setText("SCORE: " + std::to_string(_score));
+	m_score->setText("SCORE: " + std::to_string(_score) + " - SPEED: " + std::to_string(_pipeSpeed));
+	
 }
 
 void GSPlay::Draw()
@@ -157,7 +166,7 @@ void GSPlay::DrawPipe()
 	for (int i = 0; i < _pipeCount; i++) {
 
 		rand_y = rand() % (screenHeight / 2) + _pipeLevel - h / 2;
-
+		
 		auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D");
 		auto texture = ResourceManagers::GetInstance()->GetTexture("pipe-green");
 		auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -188,7 +197,7 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 	float lastX = m_pipes.back()->Get2DPosition().x;
 	int count = 0;
 	float minD = 10000;
-
+	bool f = false;
 	for (auto pipe : m_pipes) {
 		if (CheckCollision(pipe->Get2DPosition())) {
 			EndGame();
@@ -202,6 +211,7 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 			if (count % 2 == 0) {
 				rand_y = rand() % (screenHeight / 2) + _pipeLevel - h / 2;
 				y = rand_y;
+				//std::cout << rand_y << std::endl;
 			}
 			else {
 				y = rand_y + _pipeW + h;
@@ -210,8 +220,33 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 		}
 		else {
 			float x = pipe->Get2DPosition().x;
+			float y = pipe->Get2DPosition().y;
 			x -= _pipeSpeed * deltaTime;
-			pipe->Set2DPosition(x, pipe->Get2DPosition().y);
+
+			if (_canMoveY) {
+				if (count % 2 == 0) {
+					if (m_tempPipe == pipe) {
+						if (_randPosition_Y) {
+							rand_y = y - 70 * deltaTime;
+							rand_y = rand_y > (_pipeLevel - h / 2) ? rand_y : (_pipeLevel - h / 2);
+						}
+						else {
+							rand_y = y + 70 * deltaTime;
+							rand_y = rand_y < ((screenHeight / 2) + _pipeLevel - h / 2) ? rand_y : ((screenHeight / 2) + _pipeLevel - h / 2);
+						}
+						y = rand_y;
+						f = true;
+					}
+				}
+				else {
+					if (f) {
+						f = false;
+						y = rand_y + _pipeW + h;
+					}
+				}
+			}
+
+			pipe->Set2DPosition(x, y);
 		}
 		if (count % 2 != 0) {
 			lastX = pipe->Get2DPosition().x;
@@ -229,6 +264,8 @@ void GSPlay::UpdatePipePosition(float deltaTime)
 	if (m_tempPipe->Get2DPosition().x <= m_Bird->Get2DPosition().x) {
 		Mix_PlayChannel(0, pointSound, 0);
 		_score += 1;
+		_randPosition_Y = (rand() % 10 > 5);
+		_canMoveY = (rand() % 10 > 3);
 	}
 
 	m_tempPipe = m_temp;

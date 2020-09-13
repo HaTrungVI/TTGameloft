@@ -51,6 +51,8 @@ private:
 	float _pipeSpeed;
 	int _pipeLevel;
 	bool _endGame;
+	bool _randPosition_Y;
+	bool _canMoveY;
 	//int _pipeSizeW;
 	//int _pipeSizeH;
 	Mix_Chunk* pointSound;

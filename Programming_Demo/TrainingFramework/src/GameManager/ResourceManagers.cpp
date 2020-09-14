@@ -160,7 +160,7 @@ std::shared_ptr<Font> ResourceManagers::GetFont(const std::string& name)
 }
 int ResourceManagers::GetScore() {
 	std::ifstream infile;
-	infile.open("Data.dat");
+	infile.open("..\\Data\\Data.dat");
 	int data = -1;
 	infile >> data;
 	infile.close();
@@ -168,7 +168,7 @@ int ResourceManagers::GetScore() {
 }
 void ResourceManagers::SetScore(int _score) {
 	std::ofstream outfile;
-	outfile.open("Data.dat");
+	outfile.open("..\\Data\\Data.dat");
 	outfile << _score << std::endl;
 	outfile.close();
 }

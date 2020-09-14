@@ -79,9 +79,9 @@ void GSPlay::Init()
 	//
 	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
 		return;
-	wingSound = Mix_LoadWAV("wing.wav");
-	hitSound = Mix_LoadWAV("hit.wav");
-	pointSound = Mix_LoadWAV("point.wav");
+	wingSound = Mix_LoadWAV("..\\Data\\Sounds\\wing.wav");
+	hitSound = Mix_LoadWAV("..\\Data\\Sounds\\hit.wav");
+	pointSound = Mix_LoadWAV("..\\Data\\Sounds\\point.wav");
 }
 
 void GSPlay::Exit()
